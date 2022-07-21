@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "es6",
+    "moduleResolution": "node",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "resolveJsonModule": true,
+    "outDir": "types",
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react"
+  },
+  "include": ["src/**/*", "rollup.config.ts"],
+}
