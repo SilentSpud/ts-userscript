@@ -1,45 +1,49 @@
 import fs from "fs";
-import rollup from "rollup";
-import { getRollupPlugins, getExternal, DIST } from "./scripts/util";
+import swc from "rollup-plugin-swc";
+import externalGlobals from "rollup-plugin-external-globals";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 import pkg from "./package.json";
+import { RollupOptions } from "rollup";
 
-const FILENAME = "index";
-const BANNER = fs
-  .readFileSync("src/meta.js", "utf8")
-  .replace("process.env.VERSION", pkg.version);
+export default (async () => {
+  // Read .swcrc and parse it as json
+  const swcrc = JSON.parse(fs.readFileSync(".swcrc", "utf8"));
+  const BANNER = fs.readFileSync("src/meta.js", "utf8");
 
-const external = getExternal();
-const bundleOptions = {
-  extend: true,
-  esModule: false,
-};
-const rollupConfig = [
-  {
-    input: {
+  // Per-file options
+  const rollupConfig: RollupOptions[] = [
+    {
+      // index.ts
       input: "src/index.ts",
-      plugins: getRollupPlugins({ esm: true }),
+      output: {
+        file: `build/${pkg.name}.user.js`,
+      },
     },
-    output: {
-      format: "iife",
-      file: `${DIST}/${FILENAME}.user.js`,
-      ...bundleOptions,
-    },
-  },
-];
+  ];
 
-rollupConfig.forEach((item) => {
-  item.output = {
-    indent: false,
-    // If set to false, circular dependencies and live bindings for external imports won't work
-    externalLiveBindings: false,
-    ...item.output,
-    ...(BANNER && {
-      banner: BANNER,
-    }),
-  };
-});
-
-module.exports = rollupConfig.map(({ input, output }) => ({
-  ...input,
-  output,
-}));
+  // Global options
+  rollupConfig.map((item) =>
+    Object.assign(item, {
+      plugins: [
+        swc({
+          rollup: {
+            exclude: "node_modules/**",
+          },
+          ...swcrc,
+        }),
+        externalGlobals({
+          "@violentmonkey/dom": "VM",
+        }),
+        nodeResolve(),
+      ],
+      output: {
+        format: "iife",
+        indent: false,
+        extend: true,
+        esModule: false,
+        externalLiveBindings: false, // If set to false, circular dependencies and live bindings for external imports won't work
+        ...(BANNER && { banner: BANNER }),
+      },
+    })
+  );
+})();

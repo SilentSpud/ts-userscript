@@ -1,53 +1,21 @@
 import fs from "fs";
 import path from "path";
-import babel from "rollup-plugin-babel";
 import replace from "@rollup/plugin-replace";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
-import alias from "@rollup/plugin-alias";
 import postcss from "postcss";
 import cssModules from "postcss-modules";
 import pkg from "../package.json";
 
-const values = {
-  "process.env.VERSION": pkg.version,
-};
 const extensions = [".ts", ".tsx", ".js"];
-
+/*
 const rollupPluginMap = {
   css: () => cssPlugin(),
-  alias: (aliases) => alias(aliases),
-  babel: ({ babelConfig, esm }) =>
-    babel({
-      // import helpers from '@babel/runtime'
-      runtimeHelpers: true,
-      plugins: [
-        [
-          "@babel/plugin-transform-runtime",
-          {
-            useESModules: esm,
-            version: "^7.5.0", // see https://github.com/babel/babel/issues/10261#issuecomment-514687857
-          },
-        ],
-      ],
-      exclude: "node_modules/**",
-      extensions,
-      ...babelConfig,
-    }),
+  babel: () => "SWC",
   replace: () => replace({ values }),
   resolve: () => resolve({ extensions }),
   commonjs: () => commonjs(),
 };
-
-function getPostcssPlugins({ cssModules } = {}) {
-  return [
-    require("precss"),
-    require("postcss-color-function"),
-    require("postcss-calc"),
-    cssModules && require("postcss-modules")(cssModules),
-    require("cssnano"),
-  ].filter(Boolean);
-}
 
 function cssPlugin() {
   const cssMap = {};
@@ -108,8 +76,12 @@ function cssPlugin() {
     },
   };
 }
-
-export function getRollupPlugins({ babelConfig, esm, aliases } = {}) {
+type Plugin = {
+  babelConfig?: any;
+  esm?: boolean;
+  aliases?: any;
+}
+export function getRollupPlugins({ babelConfig, esm, aliases }: Plugin = {}) {
   return [
     aliases && rollupPluginMap.alias(aliases),
     rollupPluginMap.css(),
@@ -118,16 +90,4 @@ export function getRollupPlugins({ babelConfig, esm, aliases } = {}) {
     rollupPluginMap.resolve(),
     rollupPluginMap.commonjs(),
   ].filter(Boolean);
-}
-
-export function getExternal(externals = []) {
-  return (id) => {
-    if (/^@babel\/runtime[-/]/.test(id)) return true;
-    return externals.some((pattern) => {
-      if (pattern && typeof pattern.test === "function")
-        return pattern.test(id);
-      return id === pattern || id.startsWith(pattern + "/");
-    });
-  };
-}
-export const DIST = "dist";
+}*/
